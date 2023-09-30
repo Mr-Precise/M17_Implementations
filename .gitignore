@@ -3,3 +3,8 @@
 /SP5WWP/m17-decoder/m17-decoder-sym
 /SP5WWP/m17-packet/m17-packet-encode
 /SP5WWP/m17-packet/m17-packet-decode
+
+.vscode/
+.cache/
+[Bb]uild/
+compile_commands.json
