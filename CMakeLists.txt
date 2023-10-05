@@ -17,6 +17,8 @@ set(exec_prefix \${prefix})
 set(includedir \${prefix}/${CMAKE_INSTALL_INCLUDEDIR})
 set(libdir \${exec_prefix}/${CMAKE_INSTALL_LIBDIR})
 
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
+
 install(FILES
     inc/m17.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
