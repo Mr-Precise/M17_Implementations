@@ -7,7 +7,10 @@ else()
     project(M17_Implementations C)
 endif()
 
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
+
 include(GNUInstallDirs)
+include(FindMath)
 
 set(prefix "${CMAKE_INSTALL_PREFIX}")
 set(exec_prefix \${prefix})
@@ -19,8 +22,8 @@ install(FILES
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-add_subdirectory(m17-decoder)
-add_subdirectory(m17-coder)
-add_subdirectory(m17-packet)
+add_subdirectory(SP5WWP/m17-decoder)
+add_subdirectory(SP5WWP/m17-coder)
+add_subdirectory(SP5WWP/m17-packet)
 
 message(STATUS "Using install prefix: ${CMAKE_INSTALL_PREFIX}")
