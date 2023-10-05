@@ -9,7 +9,7 @@ set(m17_coder_SRC
 )
 
 add_executable(m17-coder-sym ${m17_coder_SRC})
-target_link_libraries(m17-coder-sym ${MATH_LIBRARIES})
+target_link_libraries(m17-coder-sym ${MATH_LIBRARIES} ${STATIC_LNK})
 
 install(TARGETS m17-coder-sym
   DESTINATION ${CMAKE_INSTALL_BINDIR}
