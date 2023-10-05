@@ -7,6 +7,14 @@ else()
     project(M17_Implementations C)
 endif()
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release" AND NOT MSVC)
+    if (CMAKE_C_COMPILER_ID MATCHES "GNU")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s")
+    elseif (CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Oz")
+    endif ()
+endif()
+
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
 include(GNUInstallDirs)
