@@ -16,7 +16,7 @@ There's no support for **any** encryption yet.
 ### Building (CMake)
 ```
 git clone --recursive https://github.com/Mr-Precise/M17_Implementations
-cd M17_Implementations && mkbir build && cd build
+cd M17_Implementations && mkdir build && cd build
 cmake -G "Unix Makefiles" ..
 cmake --build . --config Release
 make install
