@@ -1,5 +1,5 @@
-m17-decoder-sym: m17-decoder-sym.c golay.c golay.h viterbi.c viterbi.h crc.c crc.h ../inc/m17.h
-	gcc -Wall -O2 m17-decoder-sym.c golay.c viterbi.c crc.c -o m17-decoder-sym -lm
+m17-decoder-sym: m17-decoder-sym.c
+	gcc -I ../../libm17 -L ../../libm17 -Wall -Wextra -O2 m17-decoder-sym.c -o m17-decoder-sym -lm -lm17
 
 clean:
-	rm m17-decoder-sym
+	rm -f m17-decoder-sym

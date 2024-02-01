@@ -1,5 +1,5 @@
-m17-coder-sym: m17-coder-sym.c golay.c golay.h crc.c crc.h ../inc/m17.h
-	gcc -O2 -w m17-coder-sym.c golay.c crc.c -o m17-coder-sym -lm
+m17-coder-sym: m17-coder-sym.c
+	gcc -I ../../libm17 -L ../../libm17 -O2 -Wall -Wextra m17-coder-sym.c -o m17-coder-sym -lm -lm17
 
 clean:
-	rm m17-coder-sym
+	rm -f m17-coder-sym

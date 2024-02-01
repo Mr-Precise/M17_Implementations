@@ -2,12 +2,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <math.h>
 
-#include "../inc/m17.h"
-#include "golay.h"
-#include "viterbi.h"
-#include "crc.h"
+//libm17
+#include <m17.h>
 
 float sample;                       //last raw sample from the stdin
 float last[8];                      //look-back buffer for finding syncwords
@@ -29,53 +26,6 @@ uint8_t skip_payload_crc_check=0;   //skip payload CRC check
 uint8_t callsigns=0;                //decode callsigns?
 uint8_t show_viterbi=0;             //show Viterbi errors?
 uint8_t text_only=0;                //display text only (for text message mode)
-
-//decodes a 6-byte long array to a callsign
-void decode_callsign(uint8_t *outp, const uint8_t *inp)
-{
-	uint64_t encoded=0;
-
-	//repack the data to a uint64_t
-	for(uint8_t i=0; i<6; i++)
-		encoded|=(uint64_t)inp[5-i]<<(8*i);
-
-	//check if the value is reserved (not a callsign)
-	if(encoded>=262144000000000ULL)
-	{
-        if(encoded==0xFFFFFFFFFFFF) //broadcast
-        {
-            sprintf((char*)outp, "#BCAST");
-        }
-        else
-        {
-            outp[0]=0;
-        }
-
-        return;
-	}
-
-	//decode the callsign
-	uint8_t i=0;
-	while(encoded>0)
-	{
-		outp[i]=" ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/."[encoded%40];
-		encoded/=40;
-		i++;
-	}
-	outp[i]=0;
-}
-
-float eucl_norm(const float* in1, const int8_t* in2, uint8_t len)
-{
-    float tmp = 0.0f;
-
-    for(uint8_t i=0; i<len; i++)
-    {
-        tmp += powf(in1[i]-(float)in2[i], 2.0f);
-    }
-
-    return sqrt(tmp);
-}
 
 int main(int argc, char* argv[])
 {
@@ -138,7 +88,7 @@ int main(int argc, char* argv[])
             last[7]=sample;
 
             //calculate euclidean norm
-            dist = eucl_norm(last, pkt_sync, 8);
+            dist = eucl_norm(last, pkt_sync_symbols, 8);
 
             //fprintf(stderr, "pkt_sync dist: %3.5f\n", dist);
             if(dist<DIST_THRESH) //frame syncword detected
@@ -151,7 +101,7 @@ int main(int argc, char* argv[])
             else
             {
                 //calculate euclidean norm again, this time against LSF syncword
-                dist = eucl_norm(last, lsf_sync, 8);
+                dist = eucl_norm(last, lsf_sync_symbols, 8);
 
                 //fprintf(stderr, "lsf_sync dist: %3.5f\n", dist);
                 if(dist<DIST_THRESH) //LSF syncword
@@ -174,21 +124,21 @@ int main(int argc, char* argv[])
                 for(uint8_t i=0; i<SYM_PER_PLD; i++)
                 {
                     //bit 0
-                    if(pld[i]>=symbs[3])
+                    if(pld[i]>=symbol_list[3])
                     {
                         soft_bit[i*2+1]=0xFFFF;
                     }
-                    else if(pld[i]>=symbs[2])
+                    else if(pld[i]>=symbol_list[2])
                     {
-                        soft_bit[i*2+1]=-(float)0xFFFF/(symbs[3]-symbs[2])*symbs[2]+pld[i]*(float)0xFFFF/(symbs[3]-symbs[2]);
+                        soft_bit[i*2+1]=-(float)0xFFFF/(symbol_list[3]-symbol_list[2])*symbol_list[2]+pld[i]*(float)0xFFFF/(symbol_list[3]-symbol_list[2]);
                     }
-                    else if(pld[i]>=symbs[1])
+                    else if(pld[i]>=symbol_list[1])
                     {
                         soft_bit[i*2+1]=0x0000;
                     }
-                    else if(pld[i]>=symbs[0])
+                    else if(pld[i]>=symbol_list[0])
                     {
-                        soft_bit[i*2+1]=(float)0xFFFF/(symbs[1]-symbs[0])*symbs[1]-pld[i]*(float)0xFFFF/(symbs[1]-symbs[0]);
+                        soft_bit[i*2+1]=(float)0xFFFF/(symbol_list[1]-symbol_list[0])*symbol_list[1]-pld[i]*(float)0xFFFF/(symbol_list[1]-symbol_list[0]);
                     }
                     else
                     {
@@ -196,13 +146,13 @@ int main(int argc, char* argv[])
                     }
 
                     //bit 1
-                    if(pld[i]>=symbs[2])
+                    if(pld[i]>=symbol_list[2])
                     {
                         soft_bit[i*2]=0x0000;
                     }
-                    else if(pld[i]>=symbs[1])
+                    else if(pld[i]>=symbol_list[1])
                     {
-                        soft_bit[i*2]=0x7FFF-pld[i]*(float)0xFFFF/(symbs[2]-symbs[1]);
+                        soft_bit[i*2]=0x7FFF-pld[i]*(float)0xFFFF/(symbol_list[2]-symbol_list[1]);
                     }
                     else
                     {
@@ -227,7 +177,7 @@ int main(int argc, char* argv[])
                 if(!fl)
                 {
                     //decode
-                    uint32_t e=decodePunctured(frame_data, d_soft_bit, P_3, SYM_PER_PLD*2, 8);
+                    uint32_t e=viterbi_decode_punctured(frame_data, d_soft_bit, puncture_pattern_3, SYM_PER_PLD*2, 8);
 
                     //dump FN
                     uint8_t rx_fn=(frame_data[26]>>2)&0x1F;
@@ -290,7 +240,7 @@ int main(int argc, char* argv[])
                     //fprintf(stderr, "LSF\n");
 
                     //decode
-                    uint32_t e=decodePunctured(lsf, d_soft_bit, P_1, 2*SYM_PER_PLD, 61);
+                    uint32_t e=viterbi_decode_punctured(lsf, d_soft_bit, puncture_pattern_1, 2*SYM_PER_PLD, 61);
 
                     //shift the buffer 1 position left - get rid of the encoded flushing bits
                     for(uint8_t i=0; i<30; i++)
@@ -303,8 +253,8 @@ int main(int argc, char* argv[])
                         {
                             uint8_t d_dst[12], d_src[12]; //decoded strings
 
-                            decode_callsign(d_dst, &lsf[0]);
-                            decode_callsign(d_src, &lsf[6]);
+                            decode_callsign_bytes(d_dst, &lsf[0]);
+                            decode_callsign_bytes(d_src, &lsf[6]);
 
                             //DST
                             fprintf(stderr, "DST: %-9s ", d_dst);
