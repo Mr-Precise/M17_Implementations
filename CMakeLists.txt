@@ -36,11 +36,23 @@ endif(LINK_STATIC)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
+set(libm17_SRC_DIR ${CMAKE_SOURCE_DIR}/libm17)
+
+# add library
+add_subdirectory(libm17-cmake)
+
+# add utilities
+add_subdirectory(SP5WWP/m17-decoder)
+add_subdirectory(SP5WWP/m17-coder)
+add_subdirectory(SP5WWP/m17-packet)
+
+
 install(FILES
-    "${CMAKE_CURRENT_SOURCE_DIR}/SP5WWP/inc/m17.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libm17/m17.h"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
+# add uninstall target
 configure_file(
     ${PROJECT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
@@ -49,9 +61,5 @@ configure_file(
 add_custom_target(uninstall
     ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
 )
-
-add_subdirectory(SP5WWP/m17-decoder)
-add_subdirectory(SP5WWP/m17-coder)
-add_subdirectory(SP5WWP/m17-packet)
 
 message(STATUS "Using install prefix: ${CMAKE_INSTALL_PREFIX}")

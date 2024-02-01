@@ -13,6 +13,15 @@ Written in C, it has all the components described by the protocol's specificatio
 
 There's no support for **any** encryption yet.
 
+### Building (CMake)
+```
+git clone --recursive https://github.com/Mr-Precise/M17_Implementations
+cd M17_Implementations && mkbir build && cd build
+cmake -G "Unix Makefiles" ..
+cmake --build . --config Release
+make install
+```
+
 ### Building
 First, build the shared object `libm17.so`:
 ```
