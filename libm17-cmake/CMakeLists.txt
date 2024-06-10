@@ -15,7 +15,11 @@ endforeach(TMP_PATH)
 
 include_directories(${libm17_SRC_DIR})
 
-add_library(m17 SHARED ${libm17_SRC})
+if(LINK_STATIC)
+  add_library(m17 STATIC ${libm17_SRC})
+else()
+  add_library(m17 SHARED ${libm17_SRC})
+endif()
 
 target_link_libraries(m17 ${MATH_LIBRARIES})
 

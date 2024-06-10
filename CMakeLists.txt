@@ -31,7 +31,7 @@ if(LINK_STATIC)
     message(STATUS "ENABLED statilally link")
 else(LINK_STATIC)
     set(STATIC_LNK "")
-    message(STATUS "DISABLED statically link")
+    message(STATUS "DISABLED statically link (-DLINK_STATIC=ON to enable)")
 endif(LINK_STATIC)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
